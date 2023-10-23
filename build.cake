@@ -31,7 +31,6 @@ var srcDirectory = solutionDirectory.Combine("src");
 var testsDirectory = solutionDirectory.Combine("tests");
 var outputDirectory = solutionDirectory.Combine("build");
 var toolsDirectory = solutionDirectory.Combine("tools");
-var toolsHugoDirectory = toolsDirectory.Combine("Hugo");
 var artifactsPackagingTestsDirectory = artifactsDirectory.Combine("Packaging.Tests");
 var mongoDbDriverPackageName = "MongoDB.Driver";
 
@@ -363,47 +362,6 @@ Task("ApiDocs")
         var chmFile = artifactsDocsApiDocsDirectory.CombineWithFilePath("CSharpDriverDocs.chm");
         var artifactsDocsChmFile = artifactsDocsDirectory.CombineWithFilePath("CSharpDriverDocs.chm");
         CopyFile(chmFile, artifactsDocsChmFile);
-    });
-
-Task("RefDocs")
-    .Does(() =>
-    {
-        EnsureDirectoryExists(toolsHugoDirectory);
-        CleanDirectory(toolsHugoDirectory);
-
-        var url = "https://github.com/spf13/hugo/releases/download/v0.13/hugo_0.13_windows_amd64.zip";
-        var hugoZipFile = toolsHugoDirectory.CombineWithFilePath("hugo_0.13_windows_amd64.zip");
-        DownloadFile(url, hugoZipFile);
-        Unzip(hugoZipFile, toolsHugoDirectory);
-        var hugoExe = toolsHugoDirectory.CombineWithFilePath("hugo_0.13_windows_amd64.exe");
-
-        var landingDirectory = docsDirectory.Combine("landing");
-        var landingPublicDirectory = landingDirectory.Combine("public");
-        CleanDirectory(landingPublicDirectory);
-
-        var processSettings = new ProcessSettings
-        {
-            WorkingDirectory = landingDirectory
-        };
-        StartProcess(hugoExe, processSettings);
-
-        var referenceDirectory = docsDirectory.Combine("reference");
-        var referencePublicDirectory = referenceDirectory.Combine("public");
-        CleanDirectory(referencePublicDirectory);
-
-        processSettings = new ProcessSettings
-        {
-            WorkingDirectory = referenceDirectory
-        };
-        StartProcess(hugoExe, processSettings);
-
-        EnsureDirectoryExists(artifactsDocsRefDocsDirectory);
-        CleanDirectory(artifactsDocsRefDocsDirectory);
-
-        CopyDirectory(landingPublicDirectory, artifactsDocsRefDocsDirectory);
-
-        var artifactsReferencePublicDirectory = artifactsDocsRefDocsDirectory.Combine(gitVersion.Major + "." + gitVersion.Minor);
-        CopyDirectory(referencePublicDirectory, artifactsReferencePublicDirectory);
     });
 
 Task("Package")
